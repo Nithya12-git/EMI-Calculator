@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMI & Financial Calculator Hub</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+    :root[data-theme="light"] {
+      --primary-gradient: linear-gradient(135deg, #1e6fff 0%, #00d2ff 100%);
+      --button-gradient: linear-gradient(135deg, #0052cc 0%, #007aff 100%);
+      --secondary-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      --card-bg: #ffffff;
+      --bg-color: #f3f6fc;
+      --container-bg: #ffffff;
+      --text-dark: #0f172a;
+      --text-muted: #64748b;
+      --input-bg: #f8fafc;
+      --input-border: #cbd5e1;
+      --border-color: #e2e8f0;
+      --highlight-bg: #eef5ff;
+      --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.04);
+      --shadow-md: 0 10px 30px rgba(0, 82, 204, 0.08);
+      --shadow-lg: 0 20px 40px rgba(15, 23, 42, 0.12);
+    }
+
+    :root[data-theme="dark"] {
+      /* Rich Deep Backgrounds */
+      --bg-color: #0b0f19;
+      --container-bg: #111827;
+      --card-bg: #1f293d;
+      --input-bg: #172033;
+
+      /* Gradients */
+      --primary-gradient: linear-gradient(135deg, #1e1b4b 0%, #0f172a 50%, #1e293b 100%);
+      --button-gradient: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+      --secondary-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+
+      /* Text Colors */
+      --text-dark: #f8fafc;
+      --text-muted: #94a3b8;
+
+      /* Borders & Highlights */
+      --input-border: #334155;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --highlight-bg: rgba(59, 130, 246, 0.15);
+
+      /* Shadows with Subtle Neon Glow */
+      --shadow-sm: 0 4px 14px rgba(0, 0, 0, 0.35);
+      --shadow-md: 0 8px 24px rgba(59, 130, 246, 0.2);
+      --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.6);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+    }
+
+      body {
+        background: var(--bg-color);
+        color: var(--text-dark);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .app-container {
+        width: 100%;
+        max-width: 420px;
+        background: var(--container-bg);
+        border-radius: 36px;
+        box-shadow: var(--shadow-lg);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        height: 840px;
+        position: relative;
+        border: 1px solid var(--border-color);
+      }
+
+      /* Header */
+      .app-header {
+        background: var(--primary-gradient);
+        color: white;
+        padding: 22px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .header-title {
+        text-align: center;
+        flex-grow: 1;
+      }
+
+      .header-title h1 {
+        font-size: 1.25rem;
+        font-weight: 800;
+        letter-spacing: -0.3px;
+      }
+
+      .header-title p {
+        font-size: 0.72rem;
+        opacity: 0.85;
+        margin-top: 2px;
+      }
+
+      .header-icon {
+        font-size: 1.1rem;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.18);
+        border-radius: 50%;
+        cursor: pointer;
+        backdrop-filter: blur(4px);
+      }
+
+      /* Content Area */
+      .app-content {
+        padding: 20px;
+        flex-grow: 1;
+        overflow-y: auto;
+        background: var(--bg-color);
+      }
+
+      .tab-content {
+        display: none;
+      }
+
+      .tab-content.active {
+        display: block;
+        animation: fadeIn 0.25s ease-in-out;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(6px);
+        }
+
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Inputs & Controls */
+      .form-group {
+        margin-bottom: 16px;
+      }
+
+      .form-label {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 6px;
+      }
+
+      .form-label span {
+        color: var(--text-muted);
+        font-weight: 600;
+      }
+
+      .input-box {
+        position: relative;
+        display: flex;
+        align-items: center;
+      }
+
+      .input-box input,
+      .input-box select {
+        width: 100%;
+        padding: 12px 14px;
+        border: 2px solid var(--input-border);
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        outline: none;
+        background: var(--input-bg);
+      }
+
+      .input-box input:focus,
+      .input-box select:focus {
+        border-color: #3b82f6;
+      }
+
+      input[type="range"] {
+        width: 100%;
+        margin-top: 8px;
+        accent-color: #2563eb;
+        cursor: pointer;
+      }
+
+      .toggle-group {
+        position: absolute;
+        right: 6px;
+        display: flex;
+        background: var(--card-bg);
+        border-radius: 8px;
+        padding: 3px;
+        border: 1px solid var(--border-color);
+      }
+
+      .toggle-btn {
+        border: none;
+        background: transparent;
+        padding: 5px 12px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--text-muted);
+        border-radius: 6px;
+        cursor: pointer;
+      }
+
+      .toggle-btn.active {
+        background: #2563eb;
+        color: white;
+      }
+
+      /* Buttons */
+      .btn-primary {
+        width: 100%;
+        background: var(--button-gradient);
+        color: white;
+        border: none;
+        padding: 14px;
+        font-size: 0.95rem;
+        font-weight: 800;
+        border-radius: 28px;
+        cursor: pointer;
+        box-shadow: var(--shadow-md);
+        margin-top: 10px;
+        letter-spacing: 0.5px;
+      }
+
+      .btn-secondary {
+        width: 100%;
+        background: var(--secondary-gradient);
+        color: white;
+        border: none;
+        padding: 12px;
+        font-size: 0.88rem;
+        font-weight: 700;
+        border-radius: 24px;
+        cursor: pointer;
+        box-shadow: var(--shadow-sm);
+        margin-top: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+
+      /* Results */
+      .result-card {
+        background: var(--card-bg);
+        border-radius: 20px;
+        padding: 18px;
+        margin-top: 18px;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border-color);
+      }
+
+      .chart-container {
+        width: 130px;
+        height: 130px;
+        margin: 0 auto 15px auto;
+      }
+
+      .result-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: 1px dashed var(--border-color);
+      }
+
+      .result-row:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+      }
+
+      .result-label {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        font-weight: 600;
+      }
+
+      .result-value {
+        font-size: 0.98rem;
+        font-weight: 800;
+        color: var(--text-dark);
+      }
+
+      .highlight-box {
+        background: var(--highlight-bg);
+        padding: 12px;
+        border-radius: 12px;
+        margin-bottom: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .highlight-value {
+        color: #2563eb;
+        font-size: 1.25rem;
+        font-weight: 800;
+      }
+
+      /* Table */
+      .schedule-container {
+        max-height: 220px;
+        overflow-y: auto;
+        margin-top: 12px;
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+      }
+
+      .schedule-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.75rem;
+        text-align: left;
+      }
+
+      .schedule-table th,
+      .schedule-table td {
+        padding: 8px 10px;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .schedule-table th {
+        background: var(--input-bg);
+        color: var(--text-dark);
+        font-weight: 700;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+      }
+
+      /* Hub Menu Grid */
+      .section-header {
+        font-size: 0.78rem;
+        font-weight: 800;
+        color: var(--text-muted);
+        margin: 18px 0 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .grid-menu {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+      }
+
+      .grid-item {
+        background: var(--card-bg);
+        border-radius: 18px;
+        padding: 16px 8px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        box-shadow: var(--shadow-sm);
+        cursor: pointer;
+        border: 1px solid var(--border-color);
+      }
+
+      .grid-item:hover {
+        transform: translateY(-2px);
+      }
+
+      .grid-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: var(--highlight-bg);
+        color: #2563eb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        margin-bottom: 8px;
+      }
+
+      .grid-label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--text-dark);
+      }
+
+      /* Bottom Navigation */
+      .bottom-nav {
+        display: flex;
+        justify-content: space-around;
+        background: var(--card-bg);
+        border-top: 1px solid var(--border-color);
+        padding: 10px 0 14px;
+      }
+
+      .nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: var(--text-muted);
+        font-size: 0.7rem;
+        font-weight: 700;
+        cursor: pointer;
+        width: 25%;
+      }
+
+      .nav-item i {
+        font-size: 1.25rem;
+        margin-bottom: 3px;
+      }
+
+      .nav-item.active {
+        color: #2563eb;
+      }
+
+      .currency-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 0.88rem;
+        font-weight: 600;
+      }
+  </style>
+</head>
+
+<body>
+
+  <div class="app-container">
+    <!-- Header -->
+    <div class="app-header">
+      <div class="header-icon" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+        <i class="fa-solid fa-moon" id="theme-icon"></i>
+      </div>
+      <div class="header-title">
+        <h1 id="header-text">Financial Hub</h1>
+        <p id="header-subtext">(Be Smart with Money)</p>
+      </div>
+      <div class="header-icon" onclick="switchTab('tab-hub', 'Financial Hub')"><i class="fa-solid fa-border-all"></i>
+      </div>
+    </div>
+
+    <!-- App Content Area -->
+    <div class="app-content">
+
+      <!-- 1. EMI CALCULATOR -->
+      <div id="tab-emi" class="tab-content">
+        <div class="form-group">
+          <div class="form-label">Principal Amount <span>(₹)</span></div>
+          <div class="input-box">
+            <input type="number" id="emi-principal" placeholder="e.g. 500000"
+              oninput="syncSlider('emi-principal', 'slider-principal')">
+          </div>
+          <input type="range" id="slider-principal" min="10000" max="10000000" step="10000" value="0"
+            oninput="syncInput('slider-principal', 'emi-principal')">
+        </div>
+
+        <div class="form-group">
+          <div class="form-label">Interest Rate <span>(% p.a.)</span></div>
+          <div class="input-box">
+            <input type="number" step="0.1" id="emi-interest" placeholder="e.g. 8.5"
+              oninput="syncSlider('emi-interest', 'slider-interest')">
+          </div>
+          <input type="range" id="slider-interest" min="1" max="30" step="0.1" value="0"
+            oninput="syncInput('slider-interest', 'emi-interest')">
+        </div>
+
+        <div class="form-group">
+          <div class="form-label">Loan Tenure</div>
+          <div class="input-box">
+            <input type="number" id="emi-tenure" placeholder="e.g. 15"
+              oninput="syncSlider('emi-tenure', 'slider-tenure')">
+            <div class="toggle-group">
+              <button class="toggle-btn active" id="btn-yr" onclick="setTenureType('yr')">Year</button>
+              <button class="toggle-btn" id="btn-mo" onclick="setTenureType('mo')">Month</button>
+            </div>
+          </div>
+          <input type="range" id="slider-tenure" min="1" max="30" step="1" value="0"
+            oninput="syncInput('slider-tenure', 'emi-tenure')">
+        </div>
+
+        <button class="btn-primary" onclick="calculateEMI()">CALCULATE EMI</button>
+
+        <div class="result-card">
+          <div class="chart-container">
+            <canvas id="emiChart"></canvas>
+          </div>
+          <div class="highlight-box">
+            <span class="result-label" style="font-weight:700;">Monthly EMI</span>
+            <span class="highlight-value" id="res-emi">₹0</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">Total Interest</span>
+            <span class="result-value" id="res-interest">₹0</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">Total Principal</span>
+            <span class="result-value" id="res-principal">₹0</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">Total Payment</span>
+            <span class="result-value" id="res-total">₹0</span>
+          </div>
+
+          <div class="section-header" style="margin-top: 15px; margin-bottom: 5px;">Monthly EMI Schedule</div>
+          <div class="schedule-container">
+            <table class="schedule-table">
+              <thead>
+                <tr>
+                  <th>Mo</th>
+                  <th>EMI</th>
+                  <th>Principal</th>
+                  <th>Interest</th>
+                  <th>Balance</th>
+                </tr>
+              </thead>
+              <tbody id="schedule-body">
+                <tr>
+                  <td colspan="5" style="text-align: center; color: var(--text-muted);">Enter details to view schedule
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <button class="btn-secondary" onclick="downloadScheduleCSV()">
+            <i class="fa-solid fa-file-csv"></i> Download Schedule (.CSV)
+          </button>
+        </div>
+      </div>
+
+      <!-- 2. COMPARE LOANS -->
+      <div id="tab-compare" class="tab-content">
+        <div class="section-header">Loan Offer 1</div>
+        <div class="form-group">
+          <div class="form-label">Principal Amount (₹)</div>
+          <div class="input-box"><input type="number" id="c-amount1" placeholder="e.g. 100000"></div>
+        </div>
+        <div class="form-group">
+          <div class="form-label">Interest Rate (% p.a.)</div>
+          <div class="input-box"><input type="number" step="0.1" id="c-rate1" placeholder="e.g. 8.5"></div>
+        </div>
+        <div class="form-group">
+          <div class="form-label">Tenure (Years)</div>
+          <div class="input-box"><input type="number" id="c-tenure1" placeholder="e.g. 5"></div>
+        </div>
+
+        <div class="section-header">Loan Offer 2</div>
+        <div class="form-group">
+          <div class="form-label">Principal Amount (₹)</div>
+          <div class="input-box"><input type="number" id="c-amount2" placeholder="e.g. 120000"></div>
+        </div>
+        <div class="form-group">
+          <div class="form-label">Interest Rate (% p.a.)</div>
+          <div class="input-box"><input type="number" step="0.1" id="c-rate2" placeholder="e.g. 9.0"></div>
+        </div>
+        <div class="form-group">
+          <div class="form-label">Tenure (Years)</div>
+          <div class="input-box"><input type="number" id="c-tenure2" placeholder="e.g. 5"></div>
+        </div>
+
+        <button class="btn-primary" onclick="compareLoans()">COMPARE LOANS</button>
+
+        <div class="result-card">
+          <div class="result-row">
+            <span class="result-label">Loan 1 Payment</span>
+            <span class="result-value" id="comp-total1">₹0</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">Loan 2 Payment</span>
+            <span class="result-value" id="comp-total2">₹0</span>
+          </div>
+          <div class="highlight-box" style="margin-top:10px; margin-bottom:0;">
+            <span class="result-label" style="font-weight:700;">Difference</span>
+            <span class="highlight-value" id="comp-diff">₹0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. CURRENCY CONVERTER -->
+      <div id="tab-currency" class="tab-content">
+        <div class="form-group">
+          <div class="form-label">Amount</div>
+          <div class="input-box">
+            <input type="number" id="curr-amount" placeholder="e.g. 500" oninput="convertCurrency()">
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="form-label">Base Currency</div>
+          <div class="input-box">
+            <select id="curr-select" onchange="convertCurrency()">
+              <option value="INR">RUPPEES (₹)</option>
+              <option value="USD">DOLLAR ($)</option>
+              <option value="EUR">EURO (€)</option>
+              <option value="GBP">POUND (£)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="result-card">
+          <div class="section-header" style="margin-top:0;">Live Currency Rates</div>
+          <div class="currency-list">
+            <div class="currency-item"><span style="color:var(--text-muted);">Rupees (₹)</span><strong
+                id="c-inr">0.00</strong></div>
+            <div class="currency-item"><span style="color:var(--text-muted);">Dollar ($)</span><strong
+                id="c-usd">0.00</strong></div>
+            <div class="currency-item"><span style="color:var(--text-muted);">Euro (€)</span><strong
+                id="c-eur">0.00</strong></div>
+            <div class="currency-item"><span style="color:var(--text-muted);">Pound (£)</span><strong
+                id="c-gbp">0.00</strong></div>
+            <div class="currency-item"><span style="color:var(--text-muted);">Dirham (AED)</span><strong
+                id="c-aed">0.00</strong></div>
+            <div class="currency-item"><span style="color:var(--text-muted);">Yen (¥)</span><strong
+                id="c-jpy">0.00</strong></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. SIP CALCULATOR -->
+      <div id="tab-sip" class="tab-content">
+        <div class="form-group">
+          <div class="form-label">Monthly Investment (₹)</div>
+          <div class="input-box"><input type="number" id="sip-monthly" placeholder="e.g. 5000"></div>
+        </div>
+        <div class="form-group">
+          <div class="form-label">Expected Return Rate (% p.a.)</div>
+          <div class="input-box"><input type="number" id="sip-rate" placeholder="e.g. 12"></div>
+        </div>
+        <div class="form-group">
+          <div class="form-label">Time Period (Years)</div>
+          <div class="input-box"><input type="number" id="sip-years" placeholder="e.g. 10"></div>
+        </div>
+
+        <button class="btn-primary" onclick="calculateSIP()">CALCULATE SIP</button>
+
+        <div class="result-card">
+          <div class="result-row">
+            <span class="result-label">Invested Amount</span>
+            <span class="result-value" id="sip-invested">₹0</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">Est. Returns</span>
+            <span class="result-value" id="sip-returns">₹0</span>
+          </div>
+          <div class="highlight-box" style="margin-top:10px; margin-bottom:0;">
+            <span class="result-label" style="font-weight:700;">Total Future Value</span>
+            <span class="highlight-value" id="sip-total">₹0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. PREPAYMENT CALCULATOR (NEW) -->
+      <div id="tab-prepayment" class="tab-content">
+        <div class="form-group">
+          <div class="form-label">Remaining Principal (₹)</div>
+          <div class="input-box"><input type="number" id="pre-principal" placeholder="e.g. 1000000"></div>
+        </div>
+        <div class="form-group">
+          <div class="form-label">Interest Rate (% p.a.)</div>
+          <div class="input-box"><input type="number" step="0.1" id="pre-rate" placeholder="e.g. 8.5"></div>
+        </div>
+        <div class="form-group">
+          <div class="form-label">Remaining Tenure (Years)</div>
+          <div class="input-box"><input type="number" id="pre-tenure" placeholder="e.g. 10"></div>
+        </div>
+        <div class="form-group">
+          <div class="form-label">Lump-Sum Prepayment Amount (₹)</div>
+          <div class="input-box"><input type="number" id="pre-amount" placeholder="e.g. 200000"></div>
+        </div>
+
+        <button class="btn-primary" onclick="calculatePrepayment()">CALCULATE SAVINGS</button>
+
+        <div class="result-card">
+          <div class="highlight-box">
+            <span class="result-label" style="font-weight:700;">Interest Saved</span>
+            <span class="highlight-value" id="pre-saved">₹0</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">Original EMI</span>
+            <span class="result-value" id="pre-old-emi">₹0</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">New Reduced EMI</span>
+            <span class="result-value" id="pre-new-emi">₹0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. LUMPSUM CALCULATOR (NEW) -->
+      <div id="tab-lumpsum" class="tab-content">
+        <div class="form-group">
+          <div class="form-label">Total Investment Amount (₹)</div>
+          <div class="input-box"><input type="number" id="lump-amount" placeholder="e.g. 100000"></div>
+        </div>
+        <div class="form-group">
+          <div class="form-label">Expected Annual Return Rate (%)</div>
+          <div class="input-box"><input type="number" step="0.1" id="lump-rate" placeholder="e.g. 12"></div>
+        </div>
+        <div class="form-group">
+          <div class="form-label">Tenure (Years)</div>
+          <div class="input-box"><input type="number" id="lump-years" placeholder="e.g. 5"></div>
+        </div>
+
+        <button class="btn-primary" onclick="calculateLumpsum()">CALCULATE RETURNS</button>
+
+        <div class="result-card">
+          <div class="result-row">
+            <span class="result-label">Invested Principal</span>
+            <span class="result-value" id="lump-invested">₹0</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">Est. Gain</span>
+            <span class="result-value" id="lump-gain">₹0</span>
+          </div>
+          <div class="highlight-box" style="margin-top:10px; margin-bottom:0;">
+            <span class="result-label" style="font-weight:700;">Maturity Value</span>
+            <span class="highlight-value" id="lump-total">₹0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7. FIXED DEPOSIT (FD) CALCULATOR (NEW) -->
+      <div id="tab-fd" class="tab-content">
+        <div class="form-group">
+          <div class="form-label">Deposit Amount (₹)</div>
+          <div class="input-box"><input type="number" id="fd-principal" placeholder="e.g. 200000"></div>
+        </div>
+        <div class="form-group">
+          <div class="form-label">Interest Rate (% p.a.)</div>
+          <div class="input-box"><input type="number" step="0.1" id="fd-rate" placeholder="e.g. 7.1"></div>
+        </div>
+        <div class="form-group">
+          <div class="form-label">Time Period (Years)</div>
+          <div class="input-box"><input type="number" id="fd-years" placeholder="e.g. 3"></div>
+        </div>
+
+        <button class="btn-primary" onclick="calculateFD()">CALCULATE FD</button>
+
+        <div class="result-card">
+          <div class="result-row">
+            <span class="result-label">Deposit Amount</span>
+            <span class="result-value" id="fd-invested">₹0</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">Interest Earned</span>
+            <span class="result-value" id="fd-interest">₹0</span>
+          </div>
+          <div class="highlight-box" style="margin-top:10px; margin-bottom:0;">
+            <span class="result-label" style="font-weight:700;">Maturity Value</span>
+            <span class="highlight-value" id="fd-total">₹0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 8. GST CALCULATOR (NEW) -->
+      <div id="tab-gst" class="tab-content">
+        <div class="form-group">
+          <div class="form-label">Amount (₹)</div>
+          <div class="input-box"><input type="number" id="gst-amount" placeholder="e.g. 1000"></div>
+        </div>
+        <div class="form-group">
+          <div class="form-label">GST Rate (%)</div>
+          <div class="input-box">
+            <select id="gst-rate">
+              <option value="5">5%</option>
+              <option value="12">12%</option>
+              <option value="18" selected>18%</option>
+              <option value="28">28%</option>
+            </select>
+          </div>
+        </div>
+
+        <button class="btn-primary" onclick="calculateGST()">CALCULATE GST</button>
+
+        <div class="result-card">
+          <div class="result-row">
+            <span class="result-label">Base Amount</span>
+            <span class="result-value" id="gst-base">₹0</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">GST Amount</span>
+            <span class="result-value" id="gst-tax">₹0</span>
+          </div>
+          <div class="highlight-box" style="margin-top:10px; margin-bottom:0;">
+            <span class="result-label" style="font-weight:700;">Total Amount</span>
+            <span class="highlight-value" id="gst-total">₹0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 9. FINANCIAL HUB MENU -->
+      <div id="tab-hub" class="tab-content active">
+        <div class="section-header">Loans & Mortgages</div>
+        <div class="grid-menu">
+          <div class="grid-item" onclick="switchTab('tab-emi', 'EMI Calculator')">
+            <div class="grid-icon"><i class="fa-solid fa-calculator"></i></div>
+            <div class="grid-label">EMI</div>
+          </div>
+          <div class="grid-item" onclick="switchTab('tab-compare', 'Compare Loans')">
+            <div class="grid-icon"><i class="fa-solid fa-code-compare"></i></div>
+            <div class="grid-label">Compare</div>
+          </div>
+          <div class="grid-item" onclick="switchTab('tab-prepayment', 'Loan Prepayment')">
+            <div class="grid-icon"><i class="fa-solid fa-hand-holding-dollar"></i></div>
+            <div class="grid-label">Prepayment</div>
+          </div>
+        </div>
+
+        <div class="section-header">Investments & Wealth</div>
+        <div class="grid-menu">
+          <div class="grid-item" onclick="switchTab('tab-sip', 'SIP Calculator')">
+            <div class="grid-icon"><i class="fa-solid fa-chart-line"></i></div>
+            <div class="grid-label">SIP</div>
+          </div>
+          <div class="grid-item" onclick="switchTab('tab-lumpsum', 'Lump Sum Investment')">
+            <div class="grid-icon"><i class="fa-solid fa-sack-dollar"></i></div>
+            <div class="grid-label">Lump Sum</div>
+          </div>
+          <div class="grid-item" onclick="switchTab('tab-fd', 'Fixed Deposit (FD)')">
+            <div class="grid-icon"><i class="fa-solid fa-vault"></i></div>
+            <div class="grid-label">FD Deposit</div>
+          </div>
+        </div>
+
+        <div class="section-header">Tax & Utility</div>
+        <div class="grid-menu">
+          <div class="grid-item" onclick="switchTab('tab-currency', 'Currency Converter')">
+            <div class="grid-icon"><i class="fa-solid fa-coins"></i></div>
+            <div class="grid-label">Currency</div>
+          </div>
+          <div class="grid-item" onclick="switchTab('tab-gst', 'GST Calculator')">
+            <div class="grid-icon"><i class="fa-solid fa-receipt"></i></div>
+            <div class="grid-label">GST Tax</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Bottom Navigation Bar -->
+    <div class="bottom-nav">
+      <div class="nav-item" onclick="switchTab('tab-emi', 'EMI Calculator', this)">
+        <i class="fa-solid fa-calculator"></i>
+        <span>EMI</span>
+      </div>
+      <div class="nav-item" onclick="switchTab('tab-compare', 'Compare Loans', this)">
+        <i class="fa-solid fa-code-compare"></i>
+        <span>Compare</span>
+      </div>
+      <div class="nav-item" onclick="switchTab('tab-currency', 'Currency Converter', this)">
+        <i class="fa-solid fa-coins"></i>
+        <span>Currency</span>
+      </div>
+      <div class="nav-item active" onclick="switchTab('tab-hub', 'Financial Hub', this)">
+        <i class="fa-solid fa-border-all"></i>
+        <span>Hub</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let tenureType = 'yr';
+    let emiChartInstance = null;
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const icon = document.getElementById('theme-icon');
+      const currentTheme = html.getAttribute('data-theme');
+      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+
+      html.setAttribute('data-theme', newTheme);
+      icon.className = newTheme === 'light' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+      calculateEMI();
+    }
+
+    function formatRupee(amount) {
+      return '₹' + Math.round(amount || 0).toLocaleString('en-IN');
+    }
+
+    function syncSlider(inputId, sliderId) {
+      document.getElementById(sliderId).value = document.getElementById(inputId).value || 0;
+    }
+
+    function syncInput(sliderId, inputId) {
+      document.getElementById(inputId).value = document.getElementById(sliderId).value;
+    }
+
+    function setTenureType(type) {
+      tenureType = type;
+      document.getElementById('btn-yr').classList.toggle('active', type === 'yr');
+      document.getElementById('btn-mo').classList.toggle('active', type === 'mo');
+
+      const slider = document.getElementById('slider-tenure');
+      slider.max = (type === 'yr') ? 30 : 360;
+      calculateEMI();
+    }
+
+    function switchTab(tabId, title, navEl) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      document.getElementById('header-text').innerText = title;
+
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+      if (navEl) {
+        navEl.classList.add('active');
+      } else {
+        const hubNav = document.querySelectorAll('.nav-item')[3];
+        if (hubNav) hubNav.classList.add('active');
+      }
+    }
+
+    /* EMI Calculation */
+    function calculateEMI() {
+      const principal = parseFloat(document.getElementById('emi-principal').value) || 0;
+      const annualRate = parseFloat(document.getElementById('emi-interest').value) || 0;
+      let tenure = parseFloat(document.getElementById('emi-tenure').value) || 0;
+
+      if (principal <= 0 || annualRate <= 0 || tenure <= 0) {
+        document.getElementById('res-emi').innerText = '₹0';
+        document.getElementById('res-interest').innerText = '₹0';
+        document.getElementById('res-principal').innerText = '₹0';
+        document.getElementById('res-total').innerText = '₹0';
+        document.getElementById('schedule-body').innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Enter details to view schedule</td></tr>`;
+        updateChart(0, 0);
+        return;
+      }
+
+      if (tenureType === 'yr') tenure = tenure * 12;
+
+      const monthlyRate = annualRate / 12 / 100;
+      let emi = (principal * monthlyRate * Math.pow(1 + monthlyRate, tenure)) / (Math.pow(1 + monthlyRate, tenure) - 1);
+      const totalPayment = emi * tenure;
+      const totalInterest = Math.max(0, totalPayment - principal);
+
+      document.getElementById('res-emi').innerText = formatRupee(emi);
+      document.getElementById('res-interest').innerText = formatRupee(totalInterest);
+      document.getElementById('res-principal').innerText = formatRupee(principal);
+      document.getElementById('res-total').innerText = formatRupee(totalPayment);
+
+      renderMonthlySchedule(principal, monthlyRate, tenure, emi);
+      updateChart(principal, totalInterest);
+    }
+
+    function renderMonthlySchedule(principal, monthlyRate, tenure, emi) {
+      let tbody = document.getElementById('schedule-body');
+      tbody.innerHTML = '';
+
+      let balance = principal;
+
+      for (let month = 1; month <= tenure; month++) {
+        const interestPaid = balance * monthlyRate;
+        const principalPaid = emi - interestPaid;
+        balance = Math.max(0, balance - principalPaid);
+
+        let row = `<tr>
+                <td>${month}</td>
+                <td>₹${Math.round(emi)}</td>
+                <td>₹${Math.round(principalPaid)}</td>
+                <td>₹${Math.round(interestPaid)}</td>
+                <td>₹${Math.round(balance)}</td>
+            </tr>`;
+        tbody.innerHTML += row;
+      }
+    }
+
+    function downloadScheduleCSV() {
+      let principal = parseFloat(document.getElementById('emi-principal').value) || 0;
+      const annualRate = parseFloat(document.getElementById('emi-interest').value) || 0;
+      let tenure = parseFloat(document.getElementById('emi-tenure').value) || 0;
+
+      if (principal <= 0 || annualRate <= 0 || tenure <= 0) {
+        alert("Please enter valid loan details first!");
+        return;
+      }
+
+      if (tenureType === 'yr') tenure = tenure * 12;
+
+      const monthlyRate = annualRate / 12 / 100;
+      const emi = (principal * monthlyRate * Math.pow(1 + monthlyRate, tenure)) / (Math.pow(1 + monthlyRate, tenure) - 1);
+
+      let csvContent = "data:text/csv;charset=utf-8,Month,EMI (₹),Principal Paid (₹),Interest Paid (₹),Remaining Balance (₹)\n";
+
+      let balance = principal;
+
+      for (let month = 1; month <= tenure; month++) {
+        const interestPaid = balance * monthlyRate;
+        const principalPaid = emi - interestPaid;
+        balance = Math.max(0, balance - principalPaid);
+
+        csvContent += `${month},${emi.toFixed(2)},${principalPaid.toFixed(2)},${interestPaid.toFixed(2)},${balance.toFixed(2)}\n`;
+      }
+
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `EMI_Monthly_Schedule.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+
+    function updateChart(principal, interest) {
+      const ctx = document.getElementById('emiChart').getContext('2d');
+      if (emiChartInstance) emiChartInstance.destroy();
+
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+
+      emiChartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Principal', 'Interest'],
+          datasets: [{
+            data: [principal || 1, interest],
+            // Neon Indigo & Electric Cyan for Dark Mode
+            backgroundColor: isDark ? ['#6366f1', '#06b6d4'] : ['#0052cc', '#00d2ff'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          cutout: '72%'
+        }
+      });
+    }
+
+    /* Loan Comparison */
+    function compareLoans() {
+      const amt1 = parseFloat(document.getElementById('c-amount1').value) || 0;
+      const rate1 = parseFloat(document.getElementById('c-rate1').value) || 0;
+      const tenure1 = (parseFloat(document.getElementById('c-tenure1').value) || 0) * 12;
+
+      const amt2 = parseFloat(document.getElementById('c-amount2').value) || 0;
+      const rate2 = parseFloat(document.getElementById('c-rate2').value) || 0;
+      const tenure2 = (parseFloat(document.getElementById('c-tenure2').value) || 0) * 12;
+
+      const getEMI = (p, r, n) => {
+        if (!p || !r || !n) return 0;
+        const mr = r / 12 / 100;
+        return (p * mr * Math.pow(1 + mr, n)) / (Math.pow(1 + mr, n) - 1);
+      };
+
+      const total1 = getEMI(amt1, rate1, tenure1) * tenure1;
+      const total2 = getEMI(amt2, rate2, tenure2) * tenure2;
+      const diff = Math.abs(total1 - total2);
+
+      document.getElementById('comp-total1').innerText = formatRupee(total1);
+      document.getElementById('comp-total2').innerText = formatRupee(total2);
+      document.getElementById('comp-diff').innerText = formatRupee(diff);
+    }
+
+    /* SIP Calculation */
+    function calculateSIP() {
+      const P = parseFloat(document.getElementById('sip-monthly').value) || 0;
+      const rate = parseFloat(document.getElementById('sip-rate').value) || 0;
+      const years = parseFloat(document.getElementById('sip-years').value) || 0;
+
+      if (!P || !rate || !years) {
+        document.getElementById('sip-invested').innerText = '₹0';
+        document.getElementById('sip-returns').innerText = '₹0';
+        document.getElementById('sip-total').innerText = '₹0';
+        return;
+      }
+
+      const i = rate / 12 / 100;
+      const n = years * 12;
+      const totalValue = P * ((Math.pow(1 + i, n) - 1) / i) * (1 + i);
+      const invested = P * n;
+
+      document.getElementById('sip-invested').innerText = formatRupee(invested);
+      document.getElementById('sip-returns').innerText = formatRupee(totalValue - invested);
+      document.getElementById('sip-total').innerText = formatRupee(totalValue);
+    }
+
+    /* Currency Conversion */
+    function convertCurrency() {
+      const amount = parseFloat(document.getElementById('curr-amount').value) || 0;
+      const selected = document.getElementById('curr-select').value;
+      const ratesInINR = { INR: 1, USD: 83.0, EUR: 90.2, GBP: 105.0 };
+      const outputRates = { INR: 1, USD: 0.012, EUR: 0.011, GBP: 0.0095, AED: 0.044, JPY: 1.84 };
+
+      const inrBase = amount * ratesInINR[selected];
+      document.getElementById('c-inr').innerText = (inrBase * outputRates.INR).toFixed(2);
+      document.getElementById('c-usd').innerText = (inrBase * outputRates.USD).toFixed(2);
+      document.getElementById('c-eur').innerText = (inrBase * outputRates.EUR).toFixed(2);
+      document.getElementById('c-gbp').innerText = (inrBase * outputRates.GBP).toFixed(2);
+      document.getElementById('c-aed').innerText = (inrBase * outputRates.AED).toFixed(2);
+      document.getElementById('c-jpy').innerText = (inrBase * outputRates.JPY).toFixed(2);
+    }
+
+    /* Prepayment Calculation */
+    function calculatePrepayment() {
+      const principal = parseFloat(document.getElementById('pre-principal').value) || 0;
+      const rate = parseFloat(document.getElementById('pre-rate').value) || 0;
+      const years = parseFloat(document.getElementById('pre-tenure').value) || 0;
+      const prepay = parseFloat(document.getElementById('pre-amount').value) || 0;
+
+      if (!principal || !rate || !years) return;
+
+      const months = years * 12;
+      const r = rate / 12 / 100;
+
+      const oldEmi = (principal * r * Math.pow(1 + r, months)) / (Math.pow(1 + r, months) - 1);
+      const oldTotalInterest = (oldEmi * months) - principal;
+
+      const newPrincipal = Math.max(0, principal - prepay);
+      const newEmi = (newPrincipal * r * Math.pow(1 + r, months)) / (Math.pow(1 + r, months) - 1);
+      const newTotalInterest = (newEmi * months) - newPrincipal;
+
+      const savedInterest = Math.max(0, oldTotalInterest - newTotalInterest);
+
+      document.getElementById('pre-saved').innerText = formatRupee(savedInterest);
+      document.getElementById('pre-old-emi').innerText = formatRupee(oldEmi);
+      document.getElementById('pre-new-emi').innerText = formatRupee(newEmi);
+    }
+
+    /* Lump Sum Calculation */
+    function calculateLumpsum() {
+      const P = parseFloat(document.getElementById('lump-amount').value) || 0;
+      const r = parseFloat(document.getElementById('lump-rate').value) || 0;
+      const t = parseFloat(document.getElementById('lump-years').value) || 0;
+
+      if (!P || !r || !t) return;
+
+      const A = P * Math.pow(1 + (r / 100), t);
+      const gain = A - P;
+
+      document.getElementById('lump-invested').innerText = formatRupee(P);
+      document.getElementById('lump-gain').innerText = formatRupee(gain);
+      document.getElementById('lump-total').innerText = formatRupee(A);
+    }
+
+    /* FD Calculation (Quarterly Compounding) */
+    function calculateFD() {
+      const P = parseFloat(document.getElementById('fd-principal').value) || 0;
+      const rate = parseFloat(document.getElementById('fd-rate').value) || 0;
+      const t = parseFloat(document.getElementById('fd-years').value) || 0;
+
+      if (!P || !rate || !t) return;
+
+      const n = 4; // Quarterly compounding
+      const A = P * Math.pow(1 + ((rate / 100) / n), n * t);
+      const interest = A - P;
+
+      document.getElementById('fd-invested').innerText = formatRupee(P);
+      document.getElementById('fd-interest').innerText = formatRupee(interest);
+      document.getElementById('fd-total').innerText = formatRupee(A);
+    }
+
+    /* GST Calculation */
+    function calculateGST() {
+      const amount = parseFloat(document.getElementById('gst-amount').value) || 0;
+      const rate = parseFloat(document.getElementById('gst-rate').value) || 0;
+
+      if (!amount) return;
+
+      const gstTax = amount * (rate / 100);
+      const total = amount + gstTax;
+
+      document.getElementById('gst-base').innerText = formatRupee(amount);
+      document.getElementById('gst-tax').innerText = formatRupee(gstTax);
+      document.getElementById('gst-total').innerText = formatRupee(total);
+    }
+  
+    updateChart(0, 0);
+  </script>
+</body>
+
+</html>
